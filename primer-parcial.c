@@ -1,50 +1,62 @@
 /*
-* primer-parcial.c
-* Primer parcial - Gestión simple de libros
-* Autor: Fabrizio Brizuela
+* Primer parcial - Gestión simple de libros (versión con #define)
+* Autor: Fabri
 * Fecha: 2025-08-27
 *
-* Descripción:
-* Programa sencillo para cargar, mostrar, buscar y guardar libros.
-* Versión: añadidos comentarios y documentación.
+* Cambios principales:
+* - Se reemplazaron los valores "hardcodeados" por #define (MAX_LIBROS, MAX_TITULO, etc.)
+* - Se agregó comprobación de límites al cargar libros
+* - El nombre del archivo de salida ahora viene de un #define
 */
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+/* Configuración (evitar hardcodeo) */
+#define MAX_LIBROS 100
+#define MAX_TITULO 100
+#define MAX_AUTOR 50
+#define ARCHIVO_LIBROS "LibrosGuardados.txt"
 
 /* Estructura que representa un libro */
 struct Libros {
-	char Titulo[100];
-	char Autor[50];
+	char Titulo[MAX_TITULO];
+	char Autor[MAX_AUTOR];
 	int Ano;
 };
 
-/* Arreglo global de libros (mantengo igual que el parcial) */
-struct Libros lista[100];
+/* Arreglo global de libros */
+struct Libros lista[MAX_LIBROS];
 
 /* Prototipos de funciones */
-void CargarLibros(struct Libros *lista,int *total);
-void MostrarLibros(struct Libros *lista,int total);
-void BuscarLibro(struct Libros *lista,int total);
-void GuardarArchivo(struct Libros *lista,int total);
+void CargarLibros(struct Libros *lista, int *total);
+void MostrarLibros(struct Libros *lista, int total);
+void BuscarLibro(struct Libros *lista, int total);
+void GuardarArchivo(struct Libros *lista, int total);
 
-/* main: muestra el menú y controla el flujo del programa */
 int main(int argc, char *argv[]) {
 	int total = 0;
 	int opcion = 0;
 	
 	do {
 		printf("-----MENU-----\n");
-		printf("1.Cargar libros\n");
-		printf("2.Mostrar libros en pantalla\n");
-		printf("3.Buscar libros\n");
-		printf("4.GuardarArchivo\n");
-		printf("5.Salir del programa\n");
+		printf("1. Cargar libros\n");
+		printf("2. Mostrar libros en pantalla\n");
+		printf("3. Buscar libros\n");
+		printf("4. Guardar archivo\n");
+		printf("5. Salir del programa\n");
 		printf("-----MENU-----\n");
-		printf("¿Que opcion desea elegir?\n");
-		scanf("%d", &opcion);
+		printf("¿Qué opción desea elegir? ");
+		if (scanf("%d", &opcion) != 1) {
+			/* entrada inválida: limpiar buffer */
+			printf("Entrada inválida. Intente de nuevo.\n");
+			int c; while ((c = getchar()) != '\n' && c != EOF) ;
+			opcion = 0;
+			continue;
+		}
 		getchar(); /* consumir '\n' */
-		printf("\nEligio la opcion: %d\n", opcion);
+		printf("\nEligió la opción: %d\n", opcion);
 		
 		switch (opcion) {
 		case 1:
@@ -61,113 +73,147 @@ int main(int argc, char *argv[]) {
 			break;
 		case 5:
 			printf("Saliendo del programa\n");
-		default:;
+			break;
+		default:
+			printf("Opción inválida. Elija una opción entre 1 y 5.\n");
 		}
 	} while (opcion != 5);
 	
 	return 0;
 }
 
-/* CargarLibros: solicita datos de un libro y lo agrega a la lista */
-void CargarLibros(struct Libros *lista,int *total){
+void CargarLibros(struct Libros *lista, int *total) {
 	struct Libros m;
 	
-	printf("Ingrese el Titulo del libro:");
-	fgets(m.Titulo,sizeof(m.Titulo),stdin);
-	m.Titulo[strcspn(m.Titulo,"\n")]='\0';
+	if (*total >= MAX_LIBROS) {
+		printf("La lista de libros está llena (MAX_LIBROS = %d).\n", MAX_LIBROS);
+		return;
+	}
 	
-	printf("Ingrese el nombre del Autor del libro:");
-	fgets(m.Autor,sizeof(m.Autor),stdin);
-	m.Autor[strcspn(m.Autor,"\n")]='\0';
+	printf("Ingrese el Título del libro: ");
+	if (fgets(m.Titulo, sizeof(m.Titulo), stdin) == NULL) {
+		printf("Error leyendo el título.\n");
+		return;
+	}
+	m.Titulo[strcspn(m.Titulo, "\n")] = '\0';
 	
-	printf("Ingrese el Año del libro:");
-	scanf("%d",&m.Ano);
+	printf("Ingrese el nombre del Autor del libro: ");
+	if (fgets(m.Autor, sizeof(m.Autor), stdin) == NULL) {
+		printf("Error leyendo el autor.\n");
+		return;
+	}
+	m.Autor[strcspn(m.Autor, "\n")] = '\0';
 	
-	lista[*total]=m;
+	printf("Ingrese el Año del libro: ");
+	if (scanf("%d", &m.Ano) != 1) {
+		printf("Año inválido. Operación cancelada.\n");
+		int c; while ((c = getchar()) != '\n' && c != EOF) ;
+		return;
+	}
+	getchar(); /* consumir '\n' */
+	
+	lista[*total] = m;
 	(*total)++;
 	printf("Sus datos fueron guardados...\n");
 }
-	
-	/* MostrarLibros: imprime todos los libros cargados */
-	void MostrarLibros(struct Libros *lista,int total){
-		int i=0;
-		if(total==0){
-			printf("No hay libros cargados\n");
-		}
-		for(i=0;i<total;i++){
-			printf("-----Libro-----\n");
-			printf("Titulo:%s\n",lista[i].Titulo);
-			printf("Autor:%s\n",lista[i].Autor);
-			printf("Año:%d\n",lista[i].Ano);
-			printf("-----Libro-----\n");
-		}
+
+void MostrarLibros(struct Libros *lista, int total) {
+	if (total == 0) {
+		printf("No hay libros cargados\n");
+		return;
 	}
-		
-		/* BuscarLibro: permite buscar por título, autor o año */
-		void BuscarLibro(struct Libros *lista, int total) {
-			int opcion;
-			char texto[100];
-			int anio, encontrado = 0;
-			
-			printf("Buscar por:\n1. Titulo\n2. Autor\n3. Año\nElija una opción: ");
-			scanf("%d", &opcion);
-			getchar();
-			
-			if (opcion == 1) {
-				printf("Ingrese el Titulo: ");
-				fgets(texto, sizeof(texto), stdin);
-				texto[strcspn(texto,"\n")] ='\0';
-				for (int i = 0; i < total; i++) {
-					if (strcmp(lista[i].Titulo, texto) == 0) {
-						printf("Titulo: %s\nAutor: %s\nAño: %d\n", lista[i].Titulo, lista[i].Autor, lista[i].Ano);
-						encontrado = 1;
-					}
-				}
-			} else if (opcion == 2) {
-				printf("Ingrese el Autor: ");
-				fgets(texto, sizeof(texto), stdin);
-				texto[strcspn(texto, "\n")] = '\0';
-				for (int i = 0; i < total; i++) {
-					if (strcmp(lista[i].Autor, texto) == 0) {
-						printf("Titulo: %s\nAutor: %s\nAño: %d\n", lista[i].Titulo, lista[i].Autor, lista[i].Ano);
-						encontrado = 1;
-					}
-				}
-			} else if (opcion == 3) {
-				printf("Ingrese el Año: ");
-				scanf("%d", &anio);
-				for (int i = 0; i < total; i++) {
-					if (lista[i].Ano == anio) {
-						printf("Titulo: %s\nAutor: %s\nAño: %d\n", lista[i].Titulo, lista[i].Autor, lista[i].Ano);
-						encontrado = 1;
-					}
-				}
-			} else {
-				printf("Opción inválida.\n");
-				return;
-			}
-			
-			if (!encontrado) {
-				printf("No se encontró ningún libro con ese criterio.\n");
+	
+	for (int i = 0; i < total; i++) {
+		printf("-----Libro %d-----\n", i + 1);
+		printf("Título: %s\n", lista[i].Titulo);
+		printf("Autor: %s\n", lista[i].Autor);
+		printf("Año: %d\n", lista[i].Ano);
+		printf("------------------\n");
+	}
+}
+
+void BuscarLibro(struct Libros *lista, int total) {
+	int opcion;
+	char texto[MAX_TITULO];
+	int anio;
+	int encontrado = 0;
+	
+	if (total == 0) {
+		printf("No hay libros para buscar.\n");
+		return;
+	}
+	
+	printf("Buscar por:\n1. Título\n2. Autor\n3. Año\nElija una opción: ");
+	if (scanf("%d", &opcion) != 1) {
+		printf("Opción inválida.\n");
+		int c; while ((c = getchar()) != '\n' && c != EOF) ;
+		return;
+	}
+	getchar();
+	
+	if (opcion == 1) {
+		printf("Ingrese el Título: ");
+		if (fgets(texto, sizeof(texto), stdin) == NULL) return;
+		texto[strcspn(texto, "\n")] = '\0';
+		for (int i = 0; i < total; i++) {
+			if (strcmp(lista[i].Titulo, texto) == 0) {
+				printf("Título: %s\nAutor: %s\nAño: %d\n", lista[i].Titulo, lista[i].Autor, lista[i].Ano);
+				encontrado = 1;
 			}
 		}
-		
-		/* GuardarArchivo: escribe la lista de libros en un archivo de texto */
-		void GuardarArchivo(struct Libros *lista,int total){
-			int i=0;
-			FILE *archivo=fopen("LibrosGuardados.txt","w");
-			if(archivo==NULL){
-				printf("Error al abrir el archivo\n");
-				return;
+	} else if (opcion == 2) {
+		printf("Ingrese el Autor: ");
+		if (fgets(texto, sizeof(texto), stdin) == NULL) return;
+		texto[strcspn(texto, "\n")] = '\0';
+		for (int i = 0; i < total; i++) {
+			if (strcmp(lista[i].Autor, texto) == 0) {
+				printf("Título: %s\nAutor: %s\nAño: %d\n", lista[i].Titulo, lista[i].Autor, lista[i].Ano);
+				encontrado = 1;
 			}
-			for(i=0;i<total;i++){
-				fprintf(archivo,"-----Libro-----\n");
-				fprintf(archivo,"Titulo:%s\n",lista[i].Titulo);
-				fprintf(archivo,"Autor:%s\n",lista[i].Autor);
-				fprintf(archivo,"Año:%d\n",lista[i].Ano);
-				fprintf(archivo,"-----Libro-----\n");
-			}
-			fclose(archivo); /* Cierra el archivo correctamente */
-			printf("Libros cargados Correctamente\n");
 		}
-			
+	} else if (opcion == 3) {
+		printf("Ingrese el Año: ");
+		if (scanf("%d", &anio) != 1) {
+			printf("Año inválido.\n");
+			int c; while ((c = getchar()) != '\n' && c != EOF) ;
+			return;
+		}
+		for (int i = 0; i < total; i++) {
+			if (lista[i].Ano == anio) {
+				printf("Título: %s\nAutor: %s\nAño: %d\n", lista[i].Titulo, lista[i].Autor, lista[i].Ano);
+				encontrado = 1;
+			}
+		}
+	} else {
+		printf("Opción inválida.\n");
+		return;
+	}
+	
+	if (!encontrado) {
+		printf("No se encontró ningún libro con ese criterio.\n");
+	}
+}
+
+void GuardarArchivo(struct Libros *lista, int total) {
+	if (total == 0) {
+		printf("No hay libros para guardar.\n");
+		return;
+	}
+	
+	FILE *archivo = fopen(ARCHIVO_LIBROS, "w");
+	if (archivo == NULL) {
+		printf("Error al abrir el archivo '%s'\n", ARCHIVO_LIBROS);
+		return;
+	}
+	
+	for (int i = 0; i < total; i++) {
+		fprintf(archivo, "-----Libro-----\n");
+		fprintf(archivo, "Titulo:%s\n", lista[i].Titulo);
+		fprintf(archivo, "Autor:%s\n", lista[i].Autor);
+		fprintf(archivo, "Año:%d\n", lista[i].Ano);
+		fprintf(archivo, "-----Libro-----\n");
+	}
+	
+	fclose(archivo);
+	printf("Libros guardados correctamente en '%s'\n", ARCHIVO_LIBROS);
+}
