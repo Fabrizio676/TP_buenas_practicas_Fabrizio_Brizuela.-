@@ -1,7 +1,7 @@
 /*
-* main.c
+* primer-parcial.c
 * Primer parcial - Gestión simple de libros
-* Autor: TU_NOMBRE
+* Autor: Fabrizio Brizuela
 * Fecha: 2025-08-27
 *
 * Descripción:
