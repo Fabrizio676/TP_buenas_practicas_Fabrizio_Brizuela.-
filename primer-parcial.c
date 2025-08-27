@@ -1,20 +1,39 @@
+/*
+* main.c
+* Primer parcial - Gestión simple de libros
+* Autor: TU_NOMBRE
+* Fecha: 2025-08-27
+*
+* Descripción:
+* Programa sencillo para cargar, mostrar, buscar y guardar libros.
+* Versión: añadidos comentarios y documentación.
+*/
+
 #include <stdio.h>
 #include <string.h>
-struct Libros{
+
+/* Estructura que representa un libro */
+struct Libros {
 	char Titulo[100];
 	char Autor[50];
 	int Ano;
 };
+
+/* Arreglo global de libros (mantengo igual que el parcial) */
 struct Libros lista[100];
+
+/* Prototipos de funciones */
 void CargarLibros(struct Libros *lista,int *total);
 void MostrarLibros(struct Libros *lista,int total);
 void BuscarLibro(struct Libros *lista,int total);
 void GuardarArchivo(struct Libros *lista,int total);
+
+/* main: muestra el menú y controla el flujo del programa */
 int main(int argc, char *argv[]) {
-	int total=0;
-	int opcion=0;
+	int total = 0;
+	int opcion = 0;
 	
-	do{
+	do {
 		printf("-----MENU-----\n");
 		printf("1.Cargar libros\n");
 		printf("2.Mostrar libros en pantalla\n");
@@ -23,32 +42,33 @@ int main(int argc, char *argv[]) {
 		printf("5.Salir del programa\n");
 		printf("-----MENU-----\n");
 		printf("¿Que opcion desea elegir?\n");
-		scanf("%d",&opcion);
-		getchar();
-		printf("\nEligio la opcion: %d\n",opcion);
+		scanf("%d", &opcion);
+		getchar(); /* consumir '\n' */
+		printf("\nEligio la opcion: %d\n", opcion);
 		
-		switch(opcion){
+		switch (opcion) {
 		case 1:
-			CargarLibros(lista,&total);
+			CargarLibros(lista, &total);
 			break;
 		case 2:
-			MostrarLibros(lista,total);
+			MostrarLibros(lista, total);
 			break;
 		case 3:
-			
-			BuscarLibro(lista,total);
+			BuscarLibro(lista, total);
 			break;
 		case 4:
-			GuardarArchivo(lista,total);
+			GuardarArchivo(lista, total);
 			break;
 		case 5:
 			printf("Saliendo del programa\n");
 		default:;
 		}
-	}while(opcion!=5);
+	} while (opcion != 5);
 	
 	return 0;
 }
+
+/* CargarLibros: solicita datos de un libro y lo agrega a la lista */
 void CargarLibros(struct Libros *lista,int *total){
 	struct Libros m;
 	
@@ -66,8 +86,9 @@ void CargarLibros(struct Libros *lista,int *total){
 	lista[*total]=m;
 	(*total)++;
 	printf("Sus datos fueron guardados...\n");
-	
 }
+	
+	/* MostrarLibros: imprime todos los libros cargados */
 	void MostrarLibros(struct Libros *lista,int total){
 		int i=0;
 		if(total==0){
@@ -80,8 +101,9 @@ void CargarLibros(struct Libros *lista,int *total){
 			printf("Año:%d\n",lista[i].Ano);
 			printf("-----Libro-----\n");
 		}
-		
 	}
+		
+		/* BuscarLibro: permite buscar por título, autor o año */
 		void BuscarLibro(struct Libros *lista, int total) {
 			int opcion;
 			char texto[100];
@@ -89,7 +111,7 @@ void CargarLibros(struct Libros *lista,int *total){
 			
 			printf("Buscar por:\n1. Titulo\n2. Autor\n3. Año\nElija una opción: ");
 			scanf("%d", &opcion);
-			getchar(); 
+			getchar();
 			
 			if (opcion == 1) {
 				printf("Ingrese el Titulo: ");
@@ -129,12 +151,14 @@ void CargarLibros(struct Libros *lista,int *total){
 				printf("No se encontró ningún libro con ese criterio.\n");
 			}
 		}
+		
+		/* GuardarArchivo: escribe la lista de libros en un archivo de texto */
 		void GuardarArchivo(struct Libros *lista,int total){
 			int i=0;
 			FILE *archivo=fopen("LibrosGuardados.txt","w");
 			if(archivo==NULL){
 				printf("Error al abrir el archivo\n");
-				return; 
+				return;
 			}
 			for(i=0;i<total;i++){
 				fprintf(archivo,"-----Libro-----\n");
@@ -143,6 +167,7 @@ void CargarLibros(struct Libros *lista,int *total){
 				fprintf(archivo,"Año:%d\n",lista[i].Ano);
 				fprintf(archivo,"-----Libro-----\n");
 			}
-			fclose(archivo); // Cierra el archivo correctamente
+			fclose(archivo); /* Cierra el archivo correctamente */
 			printf("Libros cargados Correctamente\n");
 		}
+			
